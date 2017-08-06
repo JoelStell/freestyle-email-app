@@ -1,3 +1,6 @@
+#This app is not deployed on a server because it does not need to be on a time schedule. The email needs to be sent when a list of vendors has been altered.
+
+
 # Credits, Notes, and Reference
 
 ## Heroku
