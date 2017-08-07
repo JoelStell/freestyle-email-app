@@ -3,6 +3,10 @@ import sendgrid
 from sendgrid.helpers.mail import * # source of Email, Content, Mail, etc.
 import csv
 
+#Potentially enter tkniter later here
+
+
+
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 MY_EMAIL_ADDRESS = os.environ.get('MY_EMAIL_ADDRESS')
 
@@ -16,12 +20,14 @@ sg = sendgrid.SendGridAPIClient(apikey = SENDGRID_API_KEY)
 
 my_email = Email(MY_EMAIL_ADDRESS)
 
-subject = "A record has been added or changed"
+subject_create = "A product has been added to the database."
+subject_update = "A product has been changed within the database."
 from_email = my_email
 to_email = my_email
-content = Content("text/plain", "Hi, a vendir has been added or changed within the database. Please review the following vendor - VENDORNAME")
-mail = Mail(from_email, subject, to_email, content)
-
+content_create = Content("text/plain", "Hi, a new product has been added to the database and requires approval.")
+content_update = Content("text/plain", "Hi, a product has been changed within the database and requires approval.")
+mail_create = Mail(from_email, subject_create, to_email, content_create)
+mail_update = Mail(from_email, subject_update, to_email, content_update)
 
 
 # can assume these headers
@@ -93,6 +99,7 @@ def create_product(products):
     print(product)
     return product
 
+
 def update_product(products):
     product_id = user_inputs_product_id()
     try:
@@ -116,16 +123,16 @@ def show_product(products):
     except IndexError as e:
         handle_index_error()
 
-def destroy_product(products):
-    product_id = user_inputs_product_id()
-    try:
-        product = lookup_product(product_id, products)
-        del products[products.index(product)]
-        print("DESTROYING A PRODUCT HERE!")
-        print(product)
-        return product
-    except IndexError as e:
-        handle_index_error()
+# def destroy_product(products):
+#     product_id = user_inputs_product_id()
+#     try:
+#         product = lookup_product(product_id, products)
+#         del products[products.index(product)]
+#         print("DESTROYING A PRODUCT HERE!")
+#         print(product)
+#         return product
+#     except IndexError as e:
+#         handle_index_error()
 
 #
 # USER INTERFACE
@@ -144,7 +151,6 @@ There are {1} products in the database. Please select an operation:
     'Show'    | Show information about a product.
     'Create'  | Add a new product.
     'Update'  | Edit an existing product.
-    'Destroy' | Delete an existing product.
 """.format(username, len(products))
     return menu
 
@@ -160,35 +166,27 @@ def run():
     if crud_operation == "List": list_products(products)
     elif crud_operation == "Show":
         show_product(products)
-        # print("SUBJECT:", subject)
-        # print("MESSAGE:", content)
-        # # ISSUE A REQUEST FOR THE SENDGRID SERVICE TO SEND THE EMAIL
-        # response = sg.client.mail.send.post(request_body=mail.get())
-        # # PARSE RESPONSE
-        # print(response.status_code)
-        # print(response.body)
-        # print(response.headers)
     elif crud_operation == "Create":
         create_product(products)
-        print("SUBJECT:", subject)
-        print("MESSAGE:", content)
+        print("SUBJECT:", subject_create)
+        print("MESSAGE:", content_create)
         # ISSUE A REQUEST FOR THE SENDGRID SERVICE TO SEND THE EMAIL
-        response = sg.client.mail.send.post(request_body=mail.get())
+        response = sg.client.mail.send.post(request_body=mail_create.get())
         # PARSE RESPONSE
         print(response.status_code)
         print(response.body)
         print(response.headers)
     elif crud_operation == "Update":
         update_product(products)
-        print("SUBJECT:", subject)
-        print("MESSAGE:", content)
+        print("SUBJECT:", subject_update)
+        print("MESSAGE:", content_update)
         # ISSUE A REQUEST FOR THE SENDGRID SERVICE TO SEND THE EMAIL
-        response = sg.client.mail.send.post(request_body=mail.get())
+        response = sg.client.mail.send.post(request_body=mail_update.get())
         # PARSE RESPONSE
         print(response.status_code)
         print(response.body)
         print(response.headers)
-    # elif crud_operation == "Destroy": 
+    # elif crud_operation == "Destroy":
     #     destroy_product(products)
     else: process_unrecognized_operation()
 
@@ -198,23 +196,3 @@ def run():
 # this strategy allows us to test the app's component functions without asking for user input
 if __name__ == "__main__": # "if this script is run from the command-line"
     run()
-
-
-
-
-
-
-
-
-print("SUBJECT:", subject)
-print("MESSAGE:", content)
-
-# ISSUE A REQUEST FOR THE SENDGRID SERVICE TO SEND THE EMAIL
-
-response = sg.client.mail.send.post(request_body=mail.get())
-
-# PARSE RESPONSE
-
-print(response.status_code)
-print(response.body)
-print(response.headers)
